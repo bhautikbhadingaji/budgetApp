@@ -3,6 +3,7 @@ import User from '../models/userModel.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
+
 export const register = async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -59,4 +60,61 @@ export const login = async (req, res) => {
     console.error('Login error:', err);
     res.status(500).json({ message: 'Server error' });
   }
+
 };
+export const viewUserProfile = async (req, res) => {
+  try {
+    console.log("Decoded User: ", req.user); // console...............
+
+    const userId = req.user.userId; 
+    const user = await User.findById(userId).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
+
+export const editUserProfile = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const updates = req.body;
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updates, {
+      new: true,
+      runValidators: true,
+      select: "-password" 
+    });
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
+
+export const removeUserProfile = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    const deletedUser = await User.findByIdAndDelete(userId);
+
+    if (!deletedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
