@@ -7,7 +7,7 @@ import incomeRoutes from './routes/incomeRoutes.js';
 import expenseRoutes from './routes/expenseRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import homeRoutes from './routes/homeRoutes.js';
-
+import leaveRoutes from './routes/leave.js';
 
 const app = express();
 dotenv.config();
@@ -22,6 +22,7 @@ app.use('/income', incomeRoutes);
 app.use('/expenses', expenseRoutes);
 app.use('/', authRoutes);
 app.use('/home', homeRoutes);
+app.use('/leave', leaveRoutes);
 
 app.get('/', (req, res) => {
   res.send('Welcome to BudgetApp API');

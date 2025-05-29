@@ -5,7 +5,7 @@ import {
   updateIncome,
   deleteIncome
 } from '../controllers/incomeController.js';
-import { authMiddleware } from '../middleware/authmiddleware.js';
+import { authMiddleware } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 

@@ -3,7 +3,7 @@ import Expense from '../models/expenseModel.js';
 
 export const addExpense = async (req, res) => {
   try {
-    const { name, amount, date, category, userId } = req.body;
+    const { name, amount, date, category } = req.body;
 
     const expense = new Expense({
       name,
@@ -23,7 +23,8 @@ export const addExpense = async (req, res) => {
 
 export const getExpenses = async (req, res) => {
   try {
-    const { userId } = req.query;
+    const userId = req.user.userId;
+
 
     if (!userId) {
       return res.status(400).json({ message: 'User ID is required' });
@@ -39,7 +40,9 @@ export const getExpenses = async (req, res) => {
 
 export const updateExpense = async (req, res) => {
   try {
+
     const { id } = req.params;
+    const userId = req.user.userId;
     const { name, amount, date, category } = req.body;
 
     const updated = await Expense.findByIdAndUpdate(
@@ -62,6 +65,7 @@ export const updateExpense = async (req, res) => {
 export const deleteExpense = async (req, res) => {
   try {
     const { id } = req.params;
+    const userId = req.user.userId;
 
     const deleted = await Expense.findByIdAndDelete(id);
 
