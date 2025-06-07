@@ -5,11 +5,11 @@ export const createLeave = async (req, res) => {
   try {
     const { fromDate, toDate, leaveType } = req.body;
     const leave = new LeaveApplication({
-      userId: req.user.id,
+      userId: req.user.userId,
       fromDate,
       toDate,
       leaveType,
-      updatedBy: req.user.id
+      // updatedBy:req.user.userId
     });
     await leave.save();
     res.status(201).json(leave);

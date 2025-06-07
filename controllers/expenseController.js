@@ -40,9 +40,8 @@ export const getExpenses = async (req, res) => {
 
 export const updateExpense = async (req, res) => {
   try {
+    const userId = req.user.userId; 
 
-    const { id } = req.params;
-    const userId = req.user.userId;
     const { name, amount, date, category } = req.body;
 
     const updated = await Expense.findByIdAndUpdate(
@@ -61,6 +60,7 @@ export const updateExpense = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
 
 export const deleteExpense = async (req, res) => {
   try {
