@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Payout Result</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-zinc-900 text-white min-h-screen">
+  <div class="p-10">
+    <h2 class="text-3xl mb-6 font-semibold">Payout Result</h2>
+
+    <% if (error) { %>
+      <div class="bg-red-500 text-white px-4 py-2 rounded mb-4"><%= error %></div>
+    <% } %>
+
+    <% if (result) { %>
+      <table class="w-full border border-zinc-700 text-left">
+        <thead class="bg-zinc-800">
+          <tr>
+            <th class="px-4 py-2">Username</th>
+            <th class="px-4 py-2">Start Date</th>
+            <th class="px-4 py-2">End Date</th>
+            <th class="px-4 py-2">Per Hour Charge</th>
+            <th class="px-4 py-2">Total Hours</th>
+            <th class="px-4 py-2">Total Minutes</th>
+            <th class="px-4 py-2">Total Payment</th>
+          </tr>
+        </thead>
+        <tbody class="bg-zinc-700">
+          <tr>
+            <td class="px-4 py-2"><%= result.username %></td>
+            <td class="px-4 py-2"><%= result.startDate %></td>
+            <td class="px-4 py-2"><%= result.endDate %></td>
+            <td class="px-4 py-2">₹<%= result.perHourCharge %></td>
+            <td class="px-4 py-2"><%= result.totalHours %></td>
+            <td class="px-4 py-2"><%= result.totalMinutes %></td>
+            <td class="px-4 py-2 font-bold text-green-400">₹<%= result.totalPayment %></td>
+          </tr>
+        </tbody>
+      </table>
+    <% } %>
+
+    <div class="mt-6">
+      <a href="/payout/date-range"
+        class="inline-block bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded">Go Back</a>
+    </div>
+  </div>
+</body>
+
+</html>

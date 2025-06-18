@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Check Payout</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body>
+  <div class="w-full min-h-screen bg-zinc-900 text-white">
+    
+
+    <header class="text-gray-400 bg-zinc-900 body-font border-2 border-zinc-800">
+  <div class="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">
+    <a class="flex title-font font-medium items-center text-white mb-4 md:mb-0">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round"
+        stroke-linejoin="round" stroke-width="2" class="w-10 h-10 text-white p-2 bg-indigo-500 rounded-full"
+        viewBox="0 0 24 24">
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+      </svg>
+      <span class="ml-3 text-xl">BudgetApp</span>
+    </a>
+
+    <nav class="md:mr-auto md:ml-4 md:py-1 md:pl-4 md:border-l md:border-gray-700 flex flex-wrap items-center text-base justify-center text-white">
+      <a href="/income/add-income" class="mr-5 hover:text-white">Income</a>
+      <a href="/expenses/add-expenses" class="mr-5 hover:text-white">Expenses</a>
+      <a href="/leave/createLeave" class="mr-5 hover:text-white">Leave</a>
+      <a href="/workreports/createWorkReport" class="mr-5 hover:text-white">Work Report</a>
+      <a href="/payout/date-range" class="mr-5 hover:text-white">Payout</a>
+    </nav>
+
+    <% if (user) { %>
+      <form action="/logout" method="post">
+        <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded">Logout</button>
+      </form>
+    <% } else { %>
+      <a href="/login"
+        class="inline-flex items-center bg-white text-black border-0 py-1 px-3 focus:outline-none hover:bg-gray-700 rounded text-base mt-4 md:mt-0">
+        Login
+      </a>
+    <% } %>
+  </div>
+</header>
+
+ 
+    <div class="p-10">
+      <h3 class="text-3xl mb-5 font-bold">Check Payout By Date Range</h3>
+
+      <form action="/payout/date-range" method="POST" class="space-y-6">
+        <div class="flex flex-col md:flex-row gap-4">
+          <div class="w-full">
+            <label class="block mb-2 text-sm text-gray-300 font-medium">Select User</label>
+            <select name="userId" required
+              class="w-full px-3 py-2 rounded-md bg-gray-400 border-2 border-zinc-800 text-black">
+              <option value=""> Select User </option>
+              <% users.forEach(user => { %>
+                <option value="<%= user._id %>"><%= user.name %></option>
+              <% }) %>
+            </select>
+          </div>
+
+          <div class="w-full">
+            <label class="block mb-2 text-sm text-gray-300 font-medium">Start Date</label>
+            <input type="date" name="startDate" required
+              class="w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-800">
+          </div>
+
+          <div class="w-full">
+            <label class="block mb-2 text-sm text-gray-300 font-medium">End Date</label>
+            <input type="date" name="endDate" required
+              class="w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-800">
+          </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-4 pt-4">
+          <input type="submit" value="Get Payout"
+            class="px-6 py-2 rounded-md bg-blue-500 cursor-pointer hover:bg-blue-600 w-full md:w-auto">
+          <button type="button" onclick="this.form.reset();"
+            class="px-6 py-2 rounded-md bg-gray-600 hover:bg-gray-700 cursor-pointer w-full md:w-auto">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <% if (error) { %>
+  <div class="text-red-500 mb-4"><%= error %></div>
+<% } %>
+
+<% if (result) { %>
+  <div class="mt-10">
+    <h2 class="text-2xl font-semibold mb-4">Payout Result</h2>
+    <table class="min-w-full bg-zinc-800 border border-zinc-700 rounded-lg">
+      <thead>
+        <tr class="text-left border-b border-zinc-700">
+          <th class="p-4">Username</th>
+          <th class="p-4">Start Date</th>
+          <th class="p-4">End Date</th>
+          <th class="p-4">Per Hour Charge</th>
+          <th class="p-4">Total Hours</th>
+          <th class="p-4">Total Minutes</th>
+          <th class="p-4">Total Payment</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="border-b border-zinc-700">
+          <td class="p-4"><%= result.username %></td>
+          <td class="p-4"><%= result.startDate %></td>
+          <td class="p-4"><%= result.endDate %></td>
+          <td class="p-4">₹<%= result.perHourCharge %></td>
+          <td class="p-4"><%= result.totalHours %></td>
+          <td class="p-4"><%= result.totalMinutes %></td>
+          <td class="p-4 text-green-400 font-semibold">₹<%= result.totalPayment %></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+<% } %>
+  </div>
+</body>
+
+</html>

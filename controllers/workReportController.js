@@ -12,11 +12,11 @@ export const createWorkReport = async (req, res) => {
     const mins = Number(hoursWorked?.minutes || 0);
     const rate = Number(perHourCharge || 0);
 
-    // const totalHours = hrs + mins / 60;
-    // const totalPayment = totalHours * rate;
+    const totalHours = hrs + mins / 60;
+    const totalPayment = totalHours * rate;
 
     if (isNaN(totalPayment)) {
-      return res.status(400).json({ message: 'Invalid hoursWorked or perHourCharge' });
+      return res.redirect(`/workreports/createWorkReport?error=${encodeURIComponent("Invalid input: check hours or rate")}`);
     }
 
     const report = new WorkReport({
@@ -24,16 +24,24 @@ export const createWorkReport = async (req, res) => {
       username,
       hoursWorked: { hours: hrs, minutes: mins },
       description,
-      // perHourCharge: rate,
+      perHourCharge: rate,
       totalPayment,
       createdBy: req.user.userId,
     });
 
     await report.save();
-    res.status(201).json({ message: 'Create work report successfully', report });
+
+    return res.redirect("/workreports/createWorkReport?success=true");
+
   } catch (error) {
-    console.error('Create Error:', error);
-    res.status(500).json({ message: error.message });
+    console.error('Create Work Report Error:', error);
+
+    let errorMessage = 'Something went wrong';
+    if (error.message) {
+      errorMessage = error.message;
+    }
+
+    return res.redirect(`/workreports/createWorkReport?error=${encodeURIComponent(errorMessage)}`);
   }
 };
 

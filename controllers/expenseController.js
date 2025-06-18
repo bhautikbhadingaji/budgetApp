@@ -1,9 +1,12 @@
-
 import Expense from '../models/expenseModel.js';
 
 export const addExpense = async (req, res) => {
   try {
     const { name, amount, date, category } = req.body;
+
+    if (!req.user || !req.user.userId) {
+      return res.redirect(`/expenses/add-expenses?error=${encodeURIComponent("Unauthorized: user info missing")}`);
+    }
 
     const expense = new Expense({
       name,
@@ -12,19 +15,30 @@ export const addExpense = async (req, res) => {
       category,
       userId: req.user.userId
     });
+
     await expense.save();
 
-    res.status(201).json({ message: 'Expense added successfully', expense });
+    res.redirect("/expenses/add-expenses?success=true");
+
   } catch (err) {
-    console.error('Add Expense Error:', err);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Expense Error:', err.message);
+
+    let errorMessage = 'Something went wrong';
+
+    if (err.errors && Array.isArray(err.errors)) {
+      errorMessage = err.errors[0];
+    } else if (err.message) {
+      errorMessage = err.message;
+    }
+
+    res.redirect(`/expenses/add-expenses?error=${encodeURIComponent(errorMessage)}`);
   }
 };
 
+
 export const getExpenses = async (req, res) => {
   try {
-    const userId = req.user.userId;
-
+    const userId = req.user?.userId;
 
     if (!userId) {
       return res.status(400).json({ message: 'User ID is required' });
@@ -40,8 +54,7 @@ export const getExpenses = async (req, res) => {
 
 export const updateExpense = async (req, res) => {
   try {
-    const userId = req.user.userId; 
-
+    const { id } = req.params; 
     const { name, amount, date, category } = req.body;
 
     const updated = await Expense.findByIdAndUpdate(
@@ -61,11 +74,9 @@ export const updateExpense = async (req, res) => {
   }
 };
 
-
 export const deleteExpense = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user.userId;
 
     const deleted = await Expense.findByIdAndDelete(id);
 

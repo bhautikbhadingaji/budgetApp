@@ -1,11 +1,17 @@
 
 import Income from '../models/incomeModel.js';
 
+
 export const addIncome = async (req, res) => {
   try {
-    const { name, amount, date, category } = req.body;
-  console.log("Decoded JWT user:", req.user); //........
+    console.log("req.user", req.user);
+    console.log("Request Body", req.body);
 
+    const { name, amount, date, category } = req.body;
+
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({ message: "Unauthorized: user info missing" });
+    }
 
     const income = new Income({
       name,
@@ -15,13 +21,30 @@ export const addIncome = async (req, res) => {
       userId: req.user.userId
     });
 
+    console.log("Income", income);
     await income.save();
-    res.status(201).json({ message: 'Income added successfully', income });
+
+  
+   res.redirect("/income/add-income?success=true");
+
   } catch (err) {
-    console.error('Add Income Error:', err);
-    res.status(500).json({ message: 'Server error' });
+  console.error('Income Error:', err.message);
+
+  let errorMessage = 'Something went wrong';
+
+
+  if (err.errors && Array.isArray(err.errors)) {
+    errorMessage = err.errors[0];
+  } else if (err.message) {
+    errorMessage = err.message;
   }
+
+ 
+  res.redirect(`/income/add-income?error=${encodeURIComponent(errorMessage)}`);
+}
+
 };
+
 
 export const getIncomes = async (req, res) => {
   try {

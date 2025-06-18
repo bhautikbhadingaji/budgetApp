@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Income</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body>
+  <div class="w-full min-h-screen bg-zinc-900 text-white">
+
+    
+    <header class="text-gray-400 bg-zinc-900 body-font border-2 border-zinc-800">
+      <div class="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">
+        <a class="flex title-font font-medium items-center text-white mb-4 md:mb-0">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round"
+            stroke-linejoin="round" stroke-width="2" class="w-10 h-10 text-white p-2 bg-indigo-500 rounded-full"
+            viewBox="0 0 24 24">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+          </svg>
+          <span class="ml-3 text-xl">BudgetApp</span>
+        </a>
+        <nav
+          class="md:mr-auto md:ml-4 md:py-1 md:pl-4 md:border-l md:border-gray-700 flex flex-wrap items-center text-base justify-center text-white">
+          <a href="/income/add-income" class="mr-5 hover:text-white">Income</a>
+          <a href="/expenses/add-expenses" class="mr-5 hover:text-white">Expenses</a>
+          <a href="/leave/createLeave" class="mr-5 hover:text-white">Leave Application</a>
+          <a href="/workreports/createWorkReport" class="mr-5 hover:text-white">Work Report</a>
+          <a href="/payout/date-range" class="mr-5 hover:text-white">Payout</a>
+        </nav>
+
+        <% if (user) { %>
+          <form action="/logout" method="post">
+            <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded">Logout</button>
+          </form>
+        <% } else { %>
+          <a href="/login"
+            class="inline-flex items-center bg-white text-black border-0 py-1 px-3 focus:outline-none hover:bg-gray-700 rounded text-base mt-4 md:mt-0">Login</a>
+        <% } %>
+      </div>
+    </header>
+
+
+    <div class="p-10">
+     
+  <% if (success || error) { %>
+    <div id="alertBox"
+      class="mb-6 px-4 py-3 rounded relative transition-opacity duration-500 ease-in-out
+      <% if (success) { %> bg-green-100 border border-green-400 text-green-700 <% } else { %> bg-red-100 border border-red-400 text-red-700 <% } %>">
+      <strong class="font-bold">
+        <% if (success) { %>Success:<% } else { %>Error:<% } %>
+      </strong>
+      <span class="block sm:inline"><%= success || error %></span>
+    </div>
+
+    <script>
+      setTimeout(() => {
+        const alertBox = document.getElementById('alertBox');
+        if (alertBox) {
+          alertBox.style.opacity = '0';
+          setTimeout(() => alertBox.remove(), 500);
+        }
+      }, 3000);
+    </script>
+  <% } %>
+
+
+      <h3 class="text-3xl mb-5 font-bold">Add Your Income</h3>
+
+      <form action="/income/add-income" method="post" class="space-y-6">
+
+        <div class="flex gap-4 flex-col md:flex-row">
+          <div class="w-full md:w-1/2">
+            <label for="name" class="block mb-1 text-bold text-gray-300">User Name</label>
+            <input id="name" class="w-full px-3 py-2 rounded-md outline-none bg-transparent border-2 border-zinc-800"
+              type="text" placeholder="Name" name="name" required>
+          </div>
+
+          <div class="w-full md:w-1/2">
+            <label for="amount" class="block mb-1 text-bold text-gray-300">Amount</label>
+            <input id="amount" class="w-full px-3 py-2 rounded-md outline-none bg-transparent border-2 border-zinc-800"
+              type="number" placeholder="Amount" name="amount" required>
+          </div>
+        </div>
+
+        <div class="flex gap-4 flex-col md:flex-row">
+          <div class="w-full md:w-1/2">
+            <label for="date" class="block mb-1 text-bold text-gray-300">Date of Income</label>
+            <input id="date" name="date" type="date"
+              class="w-full px-3 py-2 rounded-md outline-none bg-transparent border-2 border-zinc-800" required>
+          </div>
+
+          <div class="w-full md:w-1/2">
+            <label for="category" class="block mb-1 text-bold text-gray-300">Category</label>
+            <input id="category" name="category" type="text"
+              class="w-full px-3 py-2 rounded-md outline-none bg-transparent border-2 border-zinc-800"
+              placeholder="Category" required>
+          </div>
+        </div>
+
+        <div class="flex gap-4">
+          <input type="submit" value="Add Income"
+            class="px-6 py-2 rounded-md bg-blue-500 hover:bg-blue-600 cursor-pointer" />
+
+          <button type="button" onclick="this.form.reset();"
+            class="px-6 py-2 rounded-md bg-gray-600 hover:bg-gray-700 cursor-pointer">Cancel</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</body>
+
+</html>

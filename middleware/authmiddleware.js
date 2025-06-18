@@ -1,32 +1,59 @@
 import jwt from 'jsonwebtoken';
-import User from '../models/userModel.js'; 
+import User from '../models/userModel.js';
 
 export const authMiddleware = async (req, res, next) => {
-  const authHeader = req.headers.authorization;
+  const token = req.cookies.token;
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'Token missing' });
+  if (!token) {
+    return res.redirect('/login'); 
   }
-
-  const token = authHeader.split(' ')[1];
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.userId).select('name email role');
 
-    const user = await User.findById(decoded.userId).select('username role');
     if (!user) {
-      return res.status(401).json({ error: 'User not found' });
+      return res.redirect('/login');
     }
 
     req.user = {
       userId: user._id,
-      username: user.username,
-      role: user.role
+      username: user.name,
+      email: user.email,
+      role: user.role,
     };
 
     next();
   } catch (error) {
-    console.error('JWT Error:', error);
-    res.status(401).json({ error: 'Invalid token' });
+    return res.redirect('/login'); 
   }
+};
+
+
+export const optionalAuth = async (req, res, next) => {
+  const token = req.cookies.token;
+
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const user = await User.findById(decoded.userId).select('name email role');
+
+      if (user) {
+        req.user = {
+          userId: user._id,
+          username: user.name,
+          email: user.email,
+          role: user.role,
+        };
+      } else {
+        req.user = null;
+      }
+    } catch (error) {
+      req.user = null;
+    }
+  } else {
+    req.user = null;
+  }
+
+  next();
 };

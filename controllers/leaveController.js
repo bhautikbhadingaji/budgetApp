@@ -1,23 +1,40 @@
 
 import LeaveApplication from '../models/leaveApplication.js';
-
 export const createLeave = async (req, res) => {
   try {
-    const { fromDate, toDate, leaveType } = req.body;
+    const { fromDate, toDate, type, reason } = req.body;
+
+    if (!req.user || !req.user.userId) {
+      return res.redirect(`/leave/createLeave?error=${encodeURIComponent("Unauthorized: user info missing")}`);
+    }
+
     const leave = new LeaveApplication({
       userId: req.user.userId,
       fromDate,
       toDate,
-      leaveType,
-      // updatedBy:req.user.userId
+      leaveType: type,
+      reason
     });
+
     await leave.save();
-    res.status(201).json(leave);
+
+    res.redirect("/leave/createLeave?success=true");
+
   } catch (error) {
     console.error("Register Error:", error);
-    res.status(500).json({ message: error.message });
+
+    let errorMessage = 'Something went wrong';
+    if (error.errors && Array.isArray(error.errors)) {
+      errorMessage = error.errors[0];
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+
+    res.redirect(`/leave/createLeave?error=${encodeURIComponent(errorMessage)}`);
   }
 };
+
+
 
 export const getLeaves = async (req, res) => {
   try {
