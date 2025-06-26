@@ -1,15 +1,22 @@
 import Expense from '../models/expenseModel.js';
+import User from '../models/userModel.js';
 
 export const addExpense = async (req, res) => {
   try {
-    const { name, amount, date, category } = req.body;
+    const { amount, date, category } = req.body;
 
     if (!req.user || !req.user.userId) {
       return res.redirect(`/expenses/add-expenses?error=${encodeURIComponent("Unauthorized: user info missing")}`);
     }
 
+   
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.redirect(`/expenses/add-expenses?error=${encodeURIComponent("User not found")}`);
+    }
+
     const expense = new Expense({
-      name,
+      name: user.name,
       amount,
       date,
       category,
@@ -18,13 +25,11 @@ export const addExpense = async (req, res) => {
 
     await expense.save();
 
-    res.redirect("/expenses/add-expenses?success=true");
-
+    res.redirect("/expenses/add-expenses?success=Expense added successfully");
   } catch (err) {
     console.error('Expense Error:', err.message);
 
     let errorMessage = 'Something went wrong';
-
     if (err.errors && Array.isArray(err.errors)) {
       errorMessage = err.errors[0];
     } else if (err.message) {
@@ -41,20 +46,26 @@ export const getExpenses = async (req, res) => {
     const userId = req.user?.userId;
 
     if (!userId) {
-      return res.status(400).json({ message: 'User ID is required' });
+      return res.redirect('/login');
     }
 
-    const expenses = await Expense.find({ userId });
-    res.status(200).json(expenses);
+    const expenses = await Expense.find({ userId }).populate('userId', 'name');
+
+    const success = req.query.success || null;
+    const error = req.query.error || null;
+
+    res.render('expense', { expenses, success, error, user: req.user });
   } catch (err) {
     console.error('Get Expenses Error:', err);
-    res.status(500).json({ message: 'Server error' });
+    res.render('expense', { expenses: [], success: null, error: 'Server error', user: req.user });
   }
 };
 
+
+
 export const updateExpense = async (req, res) => {
   try {
-    const { id } = req.params; 
+    const { id } = req.params;
     const { name, amount, date, category } = req.body;
 
     const updated = await Expense.findByIdAndUpdate(
@@ -73,6 +84,7 @@ export const updateExpense = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
 
 export const deleteExpense = async (req, res) => {
   try {

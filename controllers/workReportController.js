@@ -1,5 +1,5 @@
 import WorkReport from '../models/workReportModel.js';
-
+import User from '../models/userModel.js';
 
 export const createWorkReport = async (req, res) => {
   try {
@@ -45,30 +45,79 @@ export const createWorkReport = async (req, res) => {
   }
 };
 
-
 export const getWorkReports = async (req, res) => {
   try {
-    const reports =
-      req.user.role === 'admin'
-        ? await WorkReport.find().populate('createdBy updatedBy ')
-        : await WorkReport.find({ createdBy: req.user.userId }).populate('updatedBy');
+    const { userId, startDate, endDate } = req.query;
+    const filter = {};
 
-    return res.status(200).json({
-      message: 'Get work reports successfully',
-      data: reports,
+    if (req.user.role === 'admin') {
+      if (userId) {
+        filter.createdBy = userId;
+      }
+    } else {
+      filter.createdBy = req.user.userId;
+    }
+
+    if (startDate && endDate) {
+      filter.date = {
+        $gte: new Date(startDate),
+        $lte: new Date(new Date(endDate).setHours(23, 59, 59))
+      };
+    }
+
+    const reports = await WorkReport.find(filter)
+      .populate('createdBy', 'name')
+      .sort({ date: -1 });
+
+    const users = await User.find().select('name _id');
+
+    res.render('workReport', {
+      user: req.user,
+      users,
+      workReports: reports,
+      success: req.query.success,
+      error: req.query.error,
+      selectedUser: userId || '',
+      startDate: startDate || '',
+      endDate: endDate || ''
     });
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    console.error('Get Work Reports Error:', error);
+    res.status(500).send('Error fetching reports');
   }
 };
+
+export const getEditWorkReportForm = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const report = await WorkReport.findById(id);
+
+    if (!report) {
+      return res.redirect('/workreports/createWorkReport?error=Work report not found');
+    }
+
+    if (req.user.role !== 'admin' && report.createdBy.toString() !== req.user.userId) {
+      return res.redirect('/workreports/createWorkReport?error=Unauthorized');
+    }
+
+    res.render('editWorkReport', {
+      report,
+      user: req.user
+    });
+  } catch (error) {
+    console.error('Edit Work Report Error:', error);
+    res.redirect('/workreports/createWorkReport?error=Failed to load report');
+  }
+};
+
 export const updateWorkReport = async (req, res) => {
   try {
     const { id } = req.params;
-    const { hoursWorked, description, perHourCharge } = req.body;
+    const { hoursWorked, description, perHourCharge, date } = req.body;
 
     const existing = await WorkReport.findById(id);
     if (!existing) {
-      return res.status(404).json({ message: 'Work report not found' });
+      return res.status(404).send('Work report not found');
     }
 
     const hrs = Number(hoursWorked?.hours ?? existing.hoursWorked.hours);
@@ -80,14 +129,6 @@ export const updateWorkReport = async (req, res) => {
     const totalHours = hrs + mins / 60;
     const totalPayment = totalHours * rate;
 
-    
-
-    console.log('Hours:', hrs);
-    console.log('Minutes:', mins);
-    console.log('Per Hour Charge:', rate);
-    console.log('Total Hours:', totalHours);
-    console.log('Calculated Total Payment:', totalPayment);
-
     existing.hoursWorked = { hours: hrs, minutes: mins };
     existing.description = description ?? existing.description;
     existing.perHourCharge = rate;
@@ -95,21 +136,18 @@ export const updateWorkReport = async (req, res) => {
     existing.updatedBy = req.user.userId;
     existing.updatedAt = new Date();
 
+    if (date) {
+      existing.date = new Date(date);
+    }
+
     await existing.save();
 
-    console.log('Saved Document:', existing);
-
-    return res.status(200).json({
-      message: 'Work report updated successfully',
-      data: existing,
-    });
+    return res.redirect('/workreports/createWorkReport?success=Report updated successfully');
   } catch (error) {
     console.error('Error updating work report:', error);
-    return res.status(500).json({ message: error.message });
+    return res.redirect(`/workreports/createWorkReport?error=${encodeURIComponent(error.message)}`);
   }
 };
-
-
 
 export const deleteWorkReport = async (req, res) => {
   try {
@@ -130,7 +168,6 @@ export const deleteWorkReport = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
-
 
 export const getMonthlyReports = async (req, res) => {
   try {
@@ -193,7 +230,6 @@ export const getMonthlyReports = async (req, res) => {
     res.status(500).json({ message: "Something went wrong", error: error.message });
   }
 };
-
 
 export const getPayoutByDateRange = async (req, res) => {
   try {

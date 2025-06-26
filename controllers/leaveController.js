@@ -4,6 +4,8 @@ export const createLeave = async (req, res) => {
   try {
     const { fromDate, toDate, type, reason } = req.body;
 
+    console.log(reason);
+
     if (!req.user || !req.user.userId) {
       return res.redirect(`/leave/createLeave?error=${encodeURIComponent("Unauthorized: user info missing")}`);
     }
@@ -13,7 +15,7 @@ export const createLeave = async (req, res) => {
       fromDate,
       toDate,
       leaveType: type,
-      reason
+      reason: reason
     });
 
     await leave.save();
@@ -47,24 +49,48 @@ export const getLeaves = async (req, res) => {
   }
 };
 
+
 export const updateLeave = async (req, res) => {
   try {
     const { id } = req.params;
-    const { status } = req.body;
 
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ message: ' status will update only admin ' });
+   
+    if (req.user.role === 'admin' && req.body.status) {
+      await LeaveApplication.findByIdAndUpdate(id, {
+        status: req.body.status,
+        updatedBy: req.user.userId,
+        updatedAt: new Date(),
+      });
+      return res.redirect('/leave/createLeave?success=' + encodeURIComponent('Status updated successfully!'));
     }
 
-    const leave = await LeaveApplication.findByIdAndUpdate(
-      id,
-      { status, updatedBy: req.user.id },
-      { new: true }
-    );
+   
+    if (req.user.role !== 'admin') {
+      const leave = await LeaveApplication.findById(id);
 
-    res.status(200).json(leave);
+      if (!leave) {
+        return res.redirect('/leave/createLeave?error=Leave not found');
+      }
+
+      if (leave.userId.toString() !== req.user.userId.toString()) {
+        return res.redirect('/leave/createLeave?error=Permission denied');
+      }
+
+      
+      await LeaveApplication.findByIdAndUpdate(id, {
+        fromDate: req.body.fromDate,
+        toDate: req.body.toDate,
+        leaveType: req.body.type,
+        reason: req.body.reason,
+      });
+
+      return res.redirect('/leave/createLeave?success=' + encodeURIComponent('Leave updated successfully!'));
+    }
+
+    res.redirect('/leave/createLeave?error=Invalid action');
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Update Leave Error:', error);
+    res.redirect('/leave/createLeave?error=Something went wrong');
   }
 };
 
@@ -73,15 +99,28 @@ export const deleteLeave = async (req, res) => {
     const { id } = req.params;
     const leave = await LeaveApplication.findById(id);
 
-    if (!leave) return res.status(404).json({ message: 'Leave dose not find' });
-
-    if (req.user.role !== 'admin' && leave.userId.toString() !== req.user.id) {
-      return res.status(403).json({ message: 'Permission denied' });
+    if (!leave) {
+      return res.redirect('/leave/createLeave?error=Leave not found');
     }
 
-    await leave.deleteOne();
-    res.status(200).json({ message: 'Leave deleted' });
+    
+    if (req.user.role !== 'admin' && leave.userId.toString() !== req.user.userId.toString()) {
+      return res.redirect('/leave/createLeave?error=Permission denied');
+    }
+
+   
+    // leave.status = 'cancelled';
+    // await leave.save();
+
+    await leave.deleteOne(); 
+    res.redirect('/leave/createLeave');
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.redirect('/leave/createLeave');
   }
 };
+
+
+
+
+
+

@@ -1,3 +1,4 @@
+import { name } from 'ejs';
 import mongoose from 'mongoose';
 
 const workReportSchema = new mongoose.Schema(
@@ -24,18 +25,25 @@ const workReportSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    status: {
+  type: String,
+  enum: ['Paid', 'Unpaid'],
+  default: 'Unpaid'
+},
+
     // perHourCharge: {
     //   type: Number,
     //   required: true,
     // },
-    totalPayment: {
-      type: Number,
-      required: true,
-    },
+    // totalPayment: {
+    //   type: Number,
+    //   required: true,
+    // },
     createdBy: {
   type: mongoose.Schema.Types.ObjectId,
   ref: 'User',
   required: true
+
   
     },
     updatedBy: {
@@ -43,6 +51,7 @@ const workReportSchema = new mongoose.Schema(
       ref: 'User',
     },
   },
+  
   { timestamps: true }
 );
 

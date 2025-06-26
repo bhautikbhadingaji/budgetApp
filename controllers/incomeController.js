@@ -1,12 +1,7 @@
-
 import Income from '../models/incomeModel.js';
-
 
 export const addIncome = async (req, res) => {
   try {
-    console.log("req.user", req.user);
-    console.log("Request Body", req.body);
-
     const { name, amount, date, category } = req.body;
 
     if (!req.user || !req.user.userId) {
@@ -21,41 +16,44 @@ export const addIncome = async (req, res) => {
       userId: req.user.userId
     });
 
-    console.log("Income", income);
     await income.save();
-
-  
-   res.redirect("/income/add-income?success=true");
+    res.redirect("/income/add-income?success=true");
 
   } catch (err) {
-  console.error('Income Error:', err.message);
-
-  let errorMessage = 'Something went wrong';
-
-
-  if (err.errors && Array.isArray(err.errors)) {
-    errorMessage = err.errors[0];
-  } else if (err.message) {
-    errorMessage = err.message;
+    console.error('Income Error:', err.message);
+    let errorMessage = err.message || 'Something went wrong';
+    res.redirect(`/income/add-income?error=${encodeURIComponent(errorMessage)}`);
   }
-
- 
-  res.redirect(`/income/add-income?error=${encodeURIComponent(errorMessage)}`);
-}
-
 };
-
 
 export const getIncomes = async (req, res) => {
   try {
-    const userId = req.user._id; 
-    const incomes = await Income.find({ userId });
-    res.status(200).json(incomes);
+    let incomes;
+
+    if (req.user.role === 'admin') {
+      incomes = await Income.find().sort({ date: -1 }).populate('userId', 'name').lean();
+    } else {
+      incomes = await Income.find({ userId: req.user.userId }).sort({ date: -1 }).populate('userId', 'name').lean();
+    }
+
+    res.render("income", {
+      incomes,
+      success: req.query.success || null,
+      error: req.query.error || null,
+      user: req.user
+    });
   } catch (err) {
     console.error('Get Incomes Error:', err);
-    res.status(500).json({ message: 'Server error' });
+    res.render("income", {
+      incomes: [],
+      success: null,
+      error: 'Server error while fetching incomes',
+      user: req.user
+    });
   }
 };
+
+
 
 export const updateIncome = async (req, res) => {
   try {

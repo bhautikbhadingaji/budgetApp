@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Leave</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-zinc-900 text-white min-h-screen">
+  <%- include('header') %>
+
+  <div class="p-10">
+    <h1 class="text-3xl font-bold mb-6">Edit Leave</h1>
+
+    <form action="/leave/updateLeave/<%= leave._id %>?_method=PUT" method="POST" class="space-y-6">
+      <div class="flex flex-col md:flex-row gap-4">
+        <div class="w-full md:w-1/2">
+          <label for="fromDate" class="block mb-2 text-sm text-gray-300 font-medium">From Date</label>
+          <input id="fromDate" name="fromDate" type="date"
+            value="<%= leave.fromDate.toISOString().split('T')[0] %>"
+            class="w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-800 text-white"
+            required>
+        </div>
+        <div class="w-full md:w-1/2">
+          <label for="toDate" class="block mb-2 text-sm text-gray-300 font-medium">To Date</label>
+          <input id="toDate" name="toDate" type="date"
+            value="<%= leave.toDate.toISOString().split('T')[0] %>"
+            class="w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-800 text-white"
+            required>
+        </div>
+      </div>
+
+      <div class="flex flex-col md:flex-row gap-4">
+        <div class="w-full md:w-1/2">
+          <label for="type" class="block mb-2 text-sm text-gray-300 font-medium">Leave Type</label>
+          <input id="type" name="type" type="text" value="<%= leave.leaveType %>"
+            class="w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-800 text-white"
+            required>
+        </div>
+        <div class="w-full md:w-1/2">
+          <label for="reason" class="block mb-2 text-sm text-gray-300 font-medium">Reason</label>
+          <input id="reason" name="reason" type="text" value="<%= leave.reason %>"
+            class="w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-800 text-white"
+            required>
+        </div>
+      </div>
+
+      <div class="flex gap-4 mt-4">
+        <button type="submit"
+          class="px-6 py-2 rounded-md bg-blue-500 hover:bg-blue-600 cursor-pointer">
+          Update Leave
+        </button>
+        <a href="/leave/createLeave"
+          class="px-6 py-2 rounded-md bg-gray-600 hover:bg-gray-700">Cancel</a>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

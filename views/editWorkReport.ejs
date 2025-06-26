@@ -1,0 +1,46 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Work Report</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-zinc-900 text-white">
+  <%- include('header') %>
+
+  <div class="p-10">
+    <h3 class="text-3xl mb-5 font-bold">Edit Work Report</h3>
+
+    <form action="/workreports/updateWorkReport/<%= report._id %>?_method=PUT" method="POST" class="space-y-6">
+      <div class="flex flex-col md:flex-row gap-4">
+        <div class="w-full md:w-1/3">
+          <label class="block mb-2 text-sm text-gray-300 font-medium">Date</label>
+          <input class="w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-800 text-white" type="date" name="date" value="<%= report.date.toISOString().split('T')[0] %>" required>
+        </div>
+
+        <div class="w-full md:w-1/3">
+          <label class="block mb-2 text-sm text-gray-300 font-medium">Working Hours</label>
+          <input class="w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-800 text-white" type="number" name="hoursWorked[hours]" min="0" value="<%= report.hoursWorked.hours %>" required>
+        </div>
+
+        <div class="w-full md:w-1/3">
+          <label class="block mb-2 text-sm text-gray-300 font-medium">Working Minutes</label>
+          <input class="w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-800 text-white" type="number" name="hoursWorked[minutes]" min="0" max="59" value="<%= report.hoursWorked.minutes %>" required>
+        </div>
+      </div>
+
+      <div>
+        <label class="block mb-2 text-sm text-gray-300 font-medium">Description</label>
+        <input class="w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-800 text-white" type="text" name="description" maxlength="20" value="<%= report.description %>" required>
+      </div>
+
+      <div class="flex flex-col md:flex-row gap-4">
+        <input class="px-6 py-2 rounded-md bg-blue-500 hover:bg-blue-600 cursor-pointer" type="submit" value="Update">
+        <a href="/workreports/createWorkReport" class="px-6 py-2 rounded-md bg-gray-600 hover:bg-gray-700 text-white text-center">Back</a>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

@@ -1,5 +1,7 @@
+// payoutController.js
 import WorkReport from '../models/workReportModel.js';
 import User from '../models/userModel.js';
+import Expense from '../models/expenseModel.js';
 
 export const getPayoutByDateRange = async (req, res) => {
   try {
@@ -38,22 +40,65 @@ export const getPayoutByDateRange = async (req, res) => {
     const totalHrs = totalHours + totalMinutes / 60;
     const totalPayment = totalHrs * perHourCharge;
 
-   res.render('payout', {
-      user: req.user, 
-  users: await User.find({}, 'name _id'), 
-  error: null,
-  result: {
-    username,
-    startDate,
-    endDate,
-    perHourCharge,
-    totalHours,
-    totalMinutes,
-    totalPayment: totalPayment.toFixed(2)
-  }
-});
+    const status = reports.every(r => r.status === 'Paid') ? 'Paid' : 'Unpaid';
+
+    res.render('payout', {
+      user: req.user,
+      users: await User.find({}, 'name _id'),
+      success: null,
+      error: null,
+      result: {
+        userId,
+        username,
+        startDate,
+        endDate,
+        perHourCharge,
+        totalHours,
+        totalMinutes,
+        totalPayment: totalPayment.toFixed(2),
+        status
+      }
+    });
   } catch (error) {
     console.error("Payout Controller Error:", error);
     res.render('payoutResult', { error: "Server Error", result: null });
+  }
+};
+
+export const payoutToExpense = async (req, res) => {
+  try {
+    const { userId, startDate, endDate, totalPayment } = req.body;
+
+    if (!userId || !totalPayment) {
+      return res.redirect('/payout/date-range?error=Missing data');
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.redirect('/payout/date-range?error=User not found');
+    }
+
+    const expense = new Expense({
+      name: user.name,
+      amount: parseFloat(totalPayment),
+      date: new Date(),
+      category: 'Selery',
+      userId
+    });
+
+    await expense.save();
+
+    await WorkReport.updateMany({
+      createdBy: userId,
+      date: {
+        $gte: new Date(startDate),
+        $lte: new Date(new Date(endDate).setHours(23, 59, 59))
+      }
+    }, { $set: { status: 'Paid' } });
+
+    res.redirect('/payout/date-range?success=Marked as paid and added to expenses');
+  } catch (err) {
+    console.error('Click to Pay Error:', err);
+    res.redirect('/payout/date-range?error=Something went wrong');
   }
 };

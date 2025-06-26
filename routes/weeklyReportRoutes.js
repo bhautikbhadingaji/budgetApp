@@ -1,10 +1,9 @@
 import express from 'express';
-import { getHomeSummary } from '../controllers/homeController.js';
 import { authMiddleware } from '../middleware/authmiddleware.js';
-
+import { renderWeeklyReport } from '../controllers/weeklyReportController.js';
 
 const router = express.Router();
 
-router.get('/summary', authMiddleware, getHomeSummary);
+router.get('/weekly-report', authMiddleware, renderWeeklyReport);
 
 export default router;

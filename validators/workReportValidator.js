@@ -18,6 +18,6 @@ export const updateWorkReportSchema = Joi.object({
   }).required(),
 
   description: Joi.string().required().min(5).max(100),  
-  perHourCharge: Joi.number().required().min(0),
+  perHourCharge: Joi.number().min(0),
   date: Joi.date().required(),
 });

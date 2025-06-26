@@ -1,126 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Leave Report</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-
 <body>
   <div class="w-full min-h-screen bg-zinc-900 text-white">
-   
-    <header class="text-gray-400 bg-zinc-900 body-font border-2 border-zinc-800">
-      <div class="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">
-        <a class="flex title-font font-medium items-center text-white mb-4 md:mb-0">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round"
-            stroke-linejoin="round" stroke-width="2" class="w-10 h-10 text-white p-2 bg-indigo-500 rounded-full"
-            viewBox="0 0 24 24">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
-          </svg>
-          <span class="ml-3 text-xl">BudgetApp</span>
-        </a>
-        <nav
-          class="md:mr-auto md:ml-4 md:py-1 md:pl-4 md:border-l md:border-gray-700 flex flex-wrap items-center text-base justify-center text-white">
-          <a href="/income/add-income" class="mr-5 hover:text-white">Income</a>
-          <a href="/expenses/add-expenses" class="mr-5 hover:text-white">Expenses</a>
-          <a href="/leave/createLeave" class="mr-5 hover:text-white">Leave Application</a>
-          <a href="/workreports/createWorkReport" class="mr-5 hover:text-white">Work Report</a>
-          <a href="/payout/date-range" class="mr-5 hover:text-white">Payout</a>
-        </nav>
+    <%- include('header') %>
 
-        <% if (user) { %>
-        <form action="/logout" method="post">
-          <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded">Logout</button>
-        </form>
-        <% } else { %>
-        <a href="/login"
-          class="inline-flex items-center bg-white text-black border-0 py-1 px-3 focus:outline-none hover:bg-gray-700 rounded text-base mt-4 md:mt-0">Login</a>
-        <% } %>
+    <% if (success || error) { %>
+      <div id="alertBox"
+        class="mx-10 mt-6 px-4 py-3 rounded relative transition-opacity duration-500 ease-in-out
+        <% if (success) { %> bg-green-100 border border-green-400 text-green-700 <% } else { %> bg-red-100 border border-red-400 text-red-700 <% } %>">
+        <strong class="font-bold">
+          <% if (success) { %>Success:<% } else { %>Error:<% } %>
+        </strong>
+        <span class="block sm:inline">
+          <%= success || error %>
+        </span>
       </div>
-    </header>
+      <script>
+        setTimeout(() => {
+          const alertBox = document.getElementById('alertBox');
+          if (alertBox) {
+            alertBox.style.opacity = '0';
+            setTimeout(() => alertBox.remove(), 500);
+          }
+        }, 3000);
+      </script>
+    <% } %>
 
-  <% if (success || error) { %>
-  <div id="alertBox"
-    class="mx-10 mt-6 px-4 py-3 rounded relative transition-opacity duration-500 ease-in-out
-    <% if (success) { %> bg-green-100 border border-green-400 text-green-700 <% } else { %> bg-red-100 border border-red-400 text-red-700 <% } %>">
-    <strong class="font-bold">
-      <% if (success) { %>Success:<% } else { %>Error:<% } %>
-    </strong>
-    <span class="block sm:inline">
-      <% if (success) { %>
-        Leave application submitted successfully!
+    <div class="p-10">
+      <h3 class="text-3xl mb-5 font-bold">Leave Report</h3>
+      <form action="/leave/createLeave" method="post" class="space-y-6">
+        <div class="flex flex-col md:flex-row gap-4">
+          <div class="w-full md:w-1/2">
+            <label for="fromDate" class="block mb-2 text-sm text-gray-300 font-medium">From Date</label>
+            <input id="fromDate" name="fromDate" type="date"
+              class="w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-800 text-white"
+              required>
+          </div>
+          <div class="w-full md:w-1/2">
+            <label for="toDate" class="block mb-2 text-sm text-gray-300 font-medium">To Date</label>
+            <input id="toDate" name="toDate" type="date"
+              class="w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-800 text-white"
+              required>
+          </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-4">
+          <div class="w-full md:w-1/2">
+            <label for="type" class="block mb-2 text-sm text-gray-300 font-medium">Leave Type</label>
+            <input id="type" name="type" type="text" placeholder="Leave Type"
+              class="w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-800 text-white"
+              required>
+          </div>
+          <div class="w-full md:w-1/2">
+            <label for="reason" class="block mb-2 text-sm text-gray-300 font-medium">Reason</label>
+            <input id="reason" name="reason" type="text" placeholder="Reason"
+              class="w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-800 text-white"
+              required>
+          </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-4 justify-start mt-4">
+          <input class="px-6 py-2 rounded-md bg-blue-500 cursor-pointer hover:bg-blue-600 w-full md:w-auto"
+            type="submit" value="Apply For Leave">
+          <button type="button" onclick="this.form.reset();"
+            class="px-6 py-2 rounded-md bg-gray-600 hover:bg-gray-700 cursor-pointer w-full md:w-auto">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="p-10 pt-0">
+      <h3 class="text-2xl font-bold mb-4 mt-10">Your Leave Applications</h3>
+
+      <% if (leaves && leaves.length > 0) { %>
+        <table class="min-w-full bg-zinc-800 border border-zinc-700 rounded-lg text-center">
+          <thead>
+            <tr>
+              <th class="px-4 py-2 border-b">Sr No</th>
+              <% if (user.role === 'admin') { %>
+                <th class="px-4 py-2 border-b">User</th>
+              <% } %>
+              <th class="px-4 py-2 border-b">Type</th>
+              <th class="px-4 py-2 border-b">Reason</th>
+              <th class="px-4 py-2 border-b">From</th>
+              <th class="px-4 py-2 border-b">To</th>
+              <th class="px-4 py-2 border-b">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% leaves.forEach((leave, index) => { %>
+              <tr>
+                <td class="px-4 py-2 border-b"><%= index + 1 %></td>
+
+                <% if (user.role === 'admin') { %>
+                  <td class="px-4 py-2 border-b"><%= leave.userId?.name || 'N/A' %></td>
+                <% } %>
+
+                <td class="px-4 py-2 border-b"><%= leave.leaveType %></td>
+                <td class="px-4 py-2 border-b"><%= leave.reason %></td>
+                <td class="px-4 py-2 border-b"><%= new Date(leave.fromDate).toLocaleDateString() %></td>
+                <td class="px-4 py-2 border-b"><%= new Date(leave.toDate).toLocaleDateString() %></td>
+
+                <td class="px-4 py-2 border-b">
+                  <% if (user.role === 'admin') { %>
+                    <% if (leave.status === 'cancelled') { %>
+                      <span class="text-red-400 font-semibold">Cancelled</span>
+                    <% } else { %>
+                      <form action="/leave/updateLeave/<%= leave._id %>?_method=PUT" method="POST" class="flex gap-2 justify-center items-center">
+                        <select name="status" class="bg-zinc-700 text-white rounded p-1 text-sm">
+                          <option value="pending" <%= leave.status === 'pending' ? 'selected' : '' %>>Pending</option>
+                          <option value="approved" <%= leave.status === 'approved' ? 'selected' : '' %>>Approved</option>
+                          <option value="rejected" <%= leave.status === 'rejected' ? 'selected' : '' %>>Rejected</option>
+                        </select>
+                        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-sm">Update</button>
+                      </form>
+                    <% } %>
+                  <% } else { %>
+                    <%= leave.status || 'Pending' %>
+                    <% if (leave.status === 'pending') { %>
+                      <form action="/leave/delete/<%= leave._id %>?_method=DELETE" method="POST" class="inline-block ml-2" onsubmit="return confirm('Are you sure you want to cancel this leave?')">
+                        <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-sm">Cancel</button>
+                      </form>
+                      <a href="/leave/edit/<%= leave._id %>" class="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded text-sm ml-2">Edit</a>
+                    <% } else if (leave.status === 'cancelled') { %>
+                      <span class="ml-2 text-red-400 font-semibold">(Cancelled)</span>
+                    <% } %>
+                  <% } %>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
       <% } else { %>
-        Something went wrong. Please try again.
+        <p class="mt-4 text-gray-400">No leave applications found.</p>
       <% } %>
-    </span>
-  </div>
-
-  <script>
-    setTimeout(() => {
-      const alertBox = document.getElementById('alertBox');
-      if (alertBox) {
-        alertBox.style.opacity = '0';
-        setTimeout(() => alertBox.remove(), 500);
-      }
-    }, 3000);
-  </script>
-<% } %>
-
-
- 
-  <div class="p-10">
-  <h3 class="text-3xl mb-5 font-bold">Leave Report</h3>
-  <form action="/leave/createLeave" method="post" class="space-y-6">
-
-    
-    <div class="flex flex-col md:flex-row gap-4">
-      <div class="w-full md:w-1/2">
-        <label for="fromDate" class="block mb-2 text-sm text-gray-300 font-medium">From Date</label>
-        <input id="fromDate" name="fromDate" type="date"
-          class="w-full px-3 py-2 rounded-md outline-none bg-transparent border-2 border-zinc-800 text-white"
-          required>
-      </div>
-      <div class="w-full md:w-1/2">
-        <label for="toDate" class="block mb-2 text-sm text-gray-300 font-medium">To Date</label>
-        <input id="toDate" name="toDate" type="date"
-          class="w-full px-3 py-2 rounded-md outline-none bg-transparent border-2 border-zinc-800 text-white"
-          required>
-      </div>
     </div>
-
-  
-    <div class="flex flex-col md:flex-row gap-4">
-      <div class="w-full md:w-1/2">
-        <label for="type" class="block mb-2 text-sm text-gray-300 font-medium">Leave Type</label>
-        <input id="type" name="type" type="text" placeholder="Leave Type"
-          class="w-full px-3 py-2 rounded-md outline-none bg-transparent border-2 border-zinc-800 text-white"
-          required>
-      </div>
-      <div class="w-full md:w-1/2">
-        <label for="reason" class="block mb-2 text-sm text-gray-300 font-medium">Reason</label>
-        <input id="reason" name="reason" type="text" placeholder="Reason"
-          class="w-full px-3 py-2 rounded-md outline-none bg-transparent border-2 border-zinc-800 text-white"
-          required>
-      </div>
-    </div>
-
-
-    <div class="flex flex-col md:flex-row gap-4 justify-start mt-4">
-      <input class="px-6 py-2 rounded-md bg-blue-500 cursor-pointer hover:bg-blue-600 w-full md:w-auto"
-        type="submit" value="Apply For Leave">
-
-      <button type="button" onclick="this.form.reset();"
-        class="px-6 py-2 rounded-md bg-gray-600 hover:bg-gray-700 cursor-pointer w-full md:w-auto">Cancel</button>
-    </div>
-
-  </form>
-</div>
-
-
   </div>
 </body>
-
 </html>
-

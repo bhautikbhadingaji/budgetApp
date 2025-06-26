@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Weekly Report</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-zinc-900 text-white">
+
+  <%- include('header') %>
+
+  <div class="p-10">
+    <h2 class="text-3xl font-bold mb-6">Weekly Report</h2>
+
+   
+    <form action="/weekly-report" method="get" class="flex flex-col md:flex-row gap-4 mb-6">
+      <div>
+        <label>User : </label>
+        <select name="userId" class="px-3 py-2 rounded-md text-white bg-zinc-800" required>
+          <option value="">Select User</option>
+          <% users.forEach(u => { %>
+            <option value="<%= u._id %>" <%= selectedUser == u._id ? 'selected' : '' %>><%= u.name %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div>
+        <label>Month : </label>
+        <select name="month" class="px-3 py-2 rounded-md text-white bg-zinc-800" required>
+          <% for (let m = 0; m < 12; m++) { %>
+            <option value="<%= m %>" <%= selectedMonth == m ? 'selected' : '' %>><%= m + 1 %></option>
+          <% } %>
+        </select>
+      </div>
+
+      <div>
+        <label>Week : </label>
+        <select name="week" class="px-3 py-2 rounded-md text-white bg-zinc-800" required>
+          <% for (let w = 1; w <= 5; w++) { %>
+            <option value="<%= w %>" <%= selectedWeek == w ? 'selected' : '' %>>Week <%= w %></option>
+          <% } %>
+        </select>
+      </div>
+
+      <div class="flex items-end">
+        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Get weekly Report</button>
+      </div>
+    </form>
+
+  
+    <% if (reports && reports.length > 0) { %>
+      <table class="min-w-full bg-zinc-800 border border-zinc-700 rounded text-center">
+        <thead>
+          <tr class="bg-zinc-700">
+            <th class="border-b px-4 py-2">Sr No</th>
+            <th class="border-b px-4 py-2">Date</th>
+            <th class="border-b px-4 py-2">Description</th>
+            <th class="border-b px-4 py-2">Hours</th>
+            <th class="border-b px-4 py-2">Minutes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% reports.forEach((r, i) => { %>
+            <tr>
+              <td class="border-b px-4 py-2"><%= i + 1 %></td>
+              <td class="border-b px-4 py-2"><%= new Date(r.date).toLocaleDateString() %></td>
+              <td class="border-b px-4 py-2"><%= r.description %></td>
+              <td class="border-b px-4 py-2"><%= r.hoursWorked.hours %></td>
+              <td class="border-b px-4 py-2"><%= r.hoursWorked.minutes %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+        <tfoot>
+          <tr class="bg-blue-500 font-bold">
+            <td colspan="3" class="text-right px-4 py-2">Total</td>
+            <td class="px-4 py-2"><%= totalHours %></td>
+            <td class="px-4 py-2"><%= totalMinutes %></td>
+          </tr>
+        </tfoot>
+      </table>
+    <% } else if (selectedUser && selectedMonth && selectedWeek) { %>
+     
+      <table class="min-w-full bg-zinc-800 border border-zinc-700 rounded text-center">
+        <thead>
+          <tr>
+            <th class="border-b px-4 py-2">Sr No</th>
+            <th class="border-b px-4 py-2">Date</th>
+            <th class="border-b px-4 py-2">Description</th>
+            <th class="border-b px-4 py-2">Hours</th>
+            <th class="border-b px-4 py-2">Minutes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="border-b px-4 py-2">1</td>
+            <td class="border-b px-4 py-2">--</td>
+            <td class="border-b px-4 py-2">--</td>
+            <td class="border-b px-4 py-2">00</td>
+            <td class="border-b px-4 py-2">00</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="bg-zinc-700 font-bold">
+            <td colspan="3" class="text-right px-4 py-2">Total</td>
+            <td class="px-4 py-2">00</td>
+            <td class="px-4 py-2">00</td>
+          </tr>
+        </tfoot>
+      </table>
+    <% } %>
+
+  </div>
+
+</body>
+</html>

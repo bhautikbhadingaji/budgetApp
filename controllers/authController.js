@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 export const register = async (req, res) => {
-  const { name, email, password, perHourCharge } = req.body;
+  const { name, email, password, perHourCharge, role } = req.body;
 
   try {
     const userExists = await User.findOne({ email });
@@ -18,11 +18,11 @@ export const register = async (req, res) => {
       email,
       password: hashedPassword,
       perHourCharge,
+      role: role || 'user'  
     });
 
     await newUser.save();
 
-    
     res.redirect('/login');
   } catch (err) {
     console.error('Register error:', err.message);
@@ -38,7 +38,7 @@ export const login = async (req, res) => {
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).render('login', { error: 'User not found' });
+      return res.status(404).render('login', { error: 'Invalid email or password' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -52,7 +52,8 @@ export const login = async (req, res) => {
 
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      // secure: process.env.NODE_ENV === 'production',
+      secure:false,
       sameSite: 'Lax',
       maxAge: 24 * 60 * 60 * 1000,
     });
