@@ -1,4 +1,3 @@
-
 import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
@@ -15,22 +14,16 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-   role: {
+  role: {
     type: String,
-    enum: ['admin', 'user'],
+    enum: ['user', 'admin'],
     default: 'user',
+    required: true,
   },
-   perHourCharge: {
-      type: Number,
-      required: true,
-    },
-    role: {
-  type: String,
-  enum: ['user', 'admin'],
-  default: 'user',
-  required: true
-}
-
+  perHourCharge: {
+    type: Number,
+    required: true,
+  }
 }, { timestamps: true });
 
 const User = mongoose.model('User', userSchema);

@@ -1,6 +1,5 @@
 import Expense from '../models/expenseModel.js';
 import User from '../models/userModel.js';
-
 export const addExpense = async (req, res) => {
   try {
     const { amount, date, category } = req.body;
@@ -9,7 +8,6 @@ export const addExpense = async (req, res) => {
       return res.redirect(`/expenses/add-expenses?error=${encodeURIComponent("Unauthorized: user info missing")}`);
     }
 
-   
     const user = await User.findById(req.user.userId);
     if (!user) {
       return res.redirect(`/expenses/add-expenses?error=${encodeURIComponent("User not found")}`);
@@ -20,7 +18,8 @@ export const addExpense = async (req, res) => {
       amount,
       date,
       category,
-      userId: req.user.userId
+      userId: req.user.userId,        
+      createdBy: req.user.userId       
     });
 
     await expense.save();
@@ -40,7 +39,6 @@ export const addExpense = async (req, res) => {
   }
 };
 
-
 export const getExpenses = async (req, res) => {
   try {
     const userId = req.user?.userId;
@@ -49,19 +47,30 @@ export const getExpenses = async (req, res) => {
       return res.redirect('/login');
     }
 
-    const expenses = await Expense.find({ userId }).populate('userId', 'name');
+  const expenses = await Expense.find({ userId })
+  .populate({ path: 'createdBy', select: 'name', options: { strictPopulate: false } })
+  .populate({ path: 'userId', select: 'name', options: { strictPopulate: false } });
+
 
     const success = req.query.success || null;
     const error = req.query.error || null;
 
-    res.render('expense', { expenses, success, error, user: req.user });
+    res.render('expense', {
+      expenses,
+      success,
+      error,
+      user: req.user
+    });
   } catch (err) {
     console.error('Get Expenses Error:', err);
-    res.render('expense', { expenses: [], success: null, error: 'Server error', user: req.user });
+    res.render('expense', {
+      expenses: [],
+      success: null,
+      error: 'Server error',
+      user: req.user
+    });
   }
 };
-
-
 
 export const updateExpense = async (req, res) => {
   try {
@@ -84,7 +93,6 @@ export const updateExpense = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
-
 
 export const deleteExpense = async (req, res) => {
   try {

@@ -13,18 +13,30 @@ import Expense from '../models/expenseModel.js';
 
 const router = express.Router();
 
-
 router.get('/add-expenses', authMiddleware, async (req, res) => {
   try {
     let expenses;
 
     if (req.user.role === 'admin') {
-      expenses = await Expense.find().sort({ date: -1 }).populate('userId', 'name');
+      expenses = await Expense.find()
+        .sort({ date: -1 })
+        .populate({ path: 'userId', select: 'name', options: { strictPopulate: false } })
+        .populate({ path: 'createdBy', select: 'name', options: { strictPopulate: false } });
     } else {
-      expenses = await Expense.find({ userId: req.user.userId }).sort({ date: -1 });
+      expenses = await Expense.find({ userId: req.user.userId })
+        .sort({ date: -1 })
+        .populate({ path: 'userId', select: 'name', options: { strictPopulate: false } })
+        .populate({ path: 'createdBy', select: 'name', options: { strictPopulate: false } });
     }
 
     console.log("Expenses loaded for:", req.user.username);
+    expenses.forEach((exp, i) => {
+      console.log(`Expense #${i + 1}`, {
+        name: exp.name,
+        userId: exp.userId?.name,
+        createdBy: exp.createdBy?.name
+      });
+    });
 
     res.render('expense', {
       success: req.query.success,

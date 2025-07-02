@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Add Income</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
 <body class="bg-zinc-900 text-white w-full min-h-screen overflow-x-hidden">
 
@@ -72,6 +72,7 @@
         <table class="min-w-full bg-zinc-800 border border-zinc-700 rounded-lg text-center">
           <thead>
             <tr>
+              <th class="px-4 py-2 border-b">Sr No.</th>
               <th class="px-4 py-2 border-b">User Name</th>
               <th class="px-4 py-2 border-b">Amount</th>
               <th class="px-4 py-2 border-b">Category</th>
@@ -79,8 +80,9 @@
             </tr>
           </thead>
           <tbody>
-            <% incomes.forEach(income => { %>
+            <% incomes.forEach((income, index) => { %>
               <tr>
+                <td class="px-4 py-2 border-b"><%= index + 1 %></td>
                 <td class="px-4 py-2 border-b">
                   <% if (user.role === 'admin') { %>
                     <%= income.userId?.name || income.name %>
@@ -104,3 +106,26 @@
 
 </body>
 </html>
+
+
+
+
+
+
+Worked Hours Worked Minus
+44          378
+conver min to hours 
+Workedmin/60 
+378/60  = 6 Horus 18 Minus
+total Hours
+Worked Hours + converted hors = total horus
+44 + 6 = 50
+
+Final hours = 50 18
+
+asing working hours 10 10
+
+remaing - 9 0
+
+adtional working hours 
+

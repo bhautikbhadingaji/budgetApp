@@ -16,9 +16,9 @@
       <form action="/payout/date-range" method="POST" class="space-y-6">
         <div class="flex flex-col md:flex-row gap-4">
           <div class="w-full">
-            <label class="block mb-2 text-sm text-white font-medium">Select User</label>
+            <label class="block mb-2 text-sm font-medium">Select User</label>
             <select name="userId" required class="w-full px-3 py-2 rounded-md bg-zinc-900 border-2 border-zinc-800 text-white">
-              <option value=""> Select User </option>
+              <option value="">Select User</option>
               <% users.forEach(user => { %>
                 <option value="<%= user._id %>"><%= user.name %></option>
               <% }) %>
@@ -26,18 +26,18 @@
           </div>
 
           <div class="w-full">
-            <label class="block mb-2 text-sm text-gray-300 font-medium">Start Date</label>
+            <label class="block mb-2 text-sm font-medium">Start Date</label>
             <input type="date" name="startDate" required class="w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-800">
           </div>
 
           <div class="w-full">
-            <label class="block mb-2 text-sm text-gray-300 font-medium">End Date</label>
+            <label class="block mb-2 text-sm font-medium">End Date</label>
             <input type="date" name="endDate" required class="w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-800">
           </div>
         </div>
 
         <div class="flex flex-col md:flex-row gap-4 pt-4">
-          <input type="submit" value="Get Payout" class="px-6 py-2 rounded-md bg-blue-500 cursor-pointer hover:bg-blue-600 w-full md:w-auto">
+          <input type="submit" value="Get Payout" class="px-6 py-2 rounded-md bg-blue-500 hover:bg-blue-600 cursor-pointer w-full md:w-auto">
           <button type="button" onclick="this.form.reset();" class="px-6 py-2 rounded-md bg-gray-600 hover:bg-gray-700 cursor-pointer w-full md:w-auto">Cancel</button>
         </div>
       </form>
@@ -77,7 +77,6 @@
               <td class="p-4"><%= result.totalHours %></td>
               <td class="p-4"><%= result.totalMinutes %></td>
               <td class="p-4 text-green-400 font-semibold">₹<%= result.totalPayment %></td>
-
               <td class="p-4">
                 <% if (result.status === 'Paid') { %>
                   <span class="text-green-500 font-semibold">Paid</span>
@@ -85,23 +84,76 @@
                   <span class="text-red-500 font-semibold">Unpaid</span>
                 <% } %>
               </td>
-
               <td class="p-4">
                 <% if (result.status === 'Paid') { %>
                   <button disabled class="bg-gray-500 text-white px-4 py-1 rounded cursor-not-allowed">Paid</button>
                 <% } else { %>
-                 <form action="/payout/mark-paid" method="POST">
-  <input type="hidden" name="userId" value="<%= result.userId %>">
-  <input type="hidden" name="startDate" value="<%= result.startDate %>">
-  <input type="hidden" name="endDate" value="<%= result.endDate %>">
-  <input type="hidden" name="totalPayment" value="<%= result.totalPayment %>"> 
-  <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-1 rounded">
-    click to pay
-  </button>
-</form>
+                  <form action="/payout/mark-paid" method="POST">
+                    <input type="hidden" name="userId" value="<%= result.userId %>">
+                    <input type="hidden" name="startDate" value="<%= result.startDate %>">
+                    <input type="hidden" name="endDate" value="<%= result.endDate %>">
+                    <input type="hidden" name="totalPayment" value="<%= result.totalPayment %>">
+                    <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-1 rounded">
+                      Click to Pay
+                    </button>
+                  </form>
                 <% } %>
               </td>
             </tr>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+
+    <% if (allPayouts && allPayouts.length > 0) { %>
+      <div class="mt-12 px-10">
+        <h2 class="text-2xl font-semibold mb-4">Previous Payout Entries</h2>
+        <table class="min-w-full bg-zinc-800 border border-zinc-700 rounded-lg text-center">
+          <thead>
+            <tr class="border-b border-zinc-700">
+              <th class="p-4">Sr No.</th>
+              <th class="p-4">Username</th>
+              <th class="p-4">Start Date</th>
+              <th class="p-4">End Date</th>
+              <th class="p-4">Amount</th>
+              <th class="p-4">Status</th>
+              <th class="p-4">paid By</th>
+              <th class="p-4">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% allPayouts.forEach((entry, index) => { %>
+              <tr class="border-b border-zinc-700">
+                <td class="p-4"><%= index + 1 %></td>
+                <td class="p-4"><%= entry.username %></td>
+                <td class="p-4"><%= entry.startDate.toDateString() %></td>
+                <td class="p-4"><%= entry.endDate.toDateString() %></td>
+                <td class="p-4 text-green-400 font-semibold">₹<%= entry.amount.toFixed(2) %></td>
+                <td class="p-4">
+                  <% if (entry.status === 'Paid') { %>
+                    <span class="text-green-500 font-semibold">Paid</span>
+                  <% } else { %>
+                    <span class="text-red-500 font-semibold">Unpaid</span>
+                  <% } %>
+                </td>
+                <td class="p-4 text-cyan-400 font-medium"><%= entry.createdBy.name %></td>
+                <td class="p-4">
+                  <% if (entry.status === 'Paid') { %>
+                    <button disabled class="bg-gray-500 text-white px-3 py-1 rounded cursor-not-allowed">Paid</button>
+                  <% } else { %>
+                    <form action="/payout/mark-paid" method="POST">
+                      <input type="hidden" name="userId" value="<%= entry.user %>">
+                      <input type="hidden" name="startDate" value="<%= entry.startDate.toISOString().slice(0,10) %>">
+                      <input type="hidden" name="endDate" value="<%= entry.endDate.toISOString().slice(0,10) %>">
+                      <input type="hidden" name="totalPayment" value="<%= entry.amount %>">
+                      <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-1 rounded">
+                        Click to Pay
+                      </button>
+                    </form>
+                  <% } %>
+                </td>
+              </tr>
+            <% }) %>
           </tbody>
         </table>
       </div>

@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Weekly Report</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
 <body class="bg-zinc-900 text-white">
 
@@ -13,7 +13,7 @@
   <div class="p-10">
     <h2 class="text-3xl font-bold mb-6">Weekly Report</h2>
 
-   
+
     <form action="/weekly-report" method="get" class="flex flex-col md:flex-row gap-4 mb-6">
       <div>
         <label>User : </label>
@@ -44,7 +44,7 @@
       </div>
 
       <div class="flex items-end">
-        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Get weekly Report</button>
+        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Get Weekly Report</button>
       </div>
     </form>
 
@@ -79,8 +79,24 @@
           </tr>
         </tfoot>
       </table>
+
+      <% if (assignedHours !== undefined) { 
+        const totalMins = totalHours * 60 + totalMinutes;
+        const assignedMins = assignedHours * 60;
+        const remainingMins = Math.max(assignedMins - totalMins, 0);
+        const extraMins = Math.max(totalMins - assignedMins, 0);
+      %>
+        <div class="mt-6 bg-zinc-800 border border-zinc-700 rounded p-4">
+          <h3 class="text-lg font-semibold mb-2">Weekly Summary</h3>
+          <p><strong>Assigned Hours:</strong> <%= assignedHours %> hrs</p>
+          <p><strong>Worked Hours:</strong> <%= totalHours %> hrs <%= totalMinutes %> mins</p>
+          <p><strong>Remaining Hours:</strong> <%= Math.floor(remainingMins / 60) %> hrs <%= remainingMins % 60 %> mins</p>
+          <p><strong>Extra Hours:</strong> <%= Math.floor(extraMins / 60) %> hrs <%= extraMins % 60 %> mins</p>
+        </div>
+      <% } %>
+
     <% } else if (selectedUser && selectedMonth && selectedWeek) { %>
-     
+  
       <table class="min-w-full bg-zinc-800 border border-zinc-700 rounded text-center">
         <thead>
           <tr>
@@ -109,7 +125,6 @@
         </tfoot>
       </table>
     <% } %>
-
   </div>
 
 </body>

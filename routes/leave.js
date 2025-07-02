@@ -26,9 +26,13 @@ router.get('/createLeave', authMiddleware, async (req, res) => {
     let leaves = [];
 
     if (req.user.role === 'admin') {
-      leaves = await LeaveApplication.find().populate('userId').sort({ fromDate: -1 });
+      leaves = await LeaveApplication.find()
+        .populate('userId updatedBy')
+        .sort({ fromDate: -1 });
     } else {
-      leaves = await LeaveApplication.find({ userId: req.user.userId }).sort({ fromDate: -1 });
+      leaves = await LeaveApplication.find({ userId: req.user.userId })
+        .populate('updatedBy')
+        .sort({ fromDate: -1 });
     }
 
     res.render('leaveApplication', {
@@ -47,6 +51,7 @@ router.get('/createLeave', authMiddleware, async (req, res) => {
     });
   }
 });
+
 
 router.post('/createLeave', authMiddleware, validate(leaveSchema), createLeave);
 router.post('/getLeaves', authMiddleware, getLeaves);

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weekly Work Entry</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-zinc-900 text-white">
+  <%- include('header') %>
+
+  <div class="p-8">
+    <h2 class="text-3xl font-bold mb-6">Weekly Work Entry</h2>
+
+    <% if (error) { %>
+      <div class="mb-4 p-4 bg-red-500 rounded"><%= error %></div>
+    <% } %>
+
+    <% if (prevRemaining) { %>
+      <div class="mb-4 p-4 bg-yellow-600 rounded">
+        Previous week's remaining hours: <%= prevRemaining %>
+      </div>
+    <% } %>
+
+    
+    <form action="/weekly-work" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+      <div>
+        <label for="userId" class="block mb-1">User</label>
+        <select name="userId" id="userId" required class="w-full px-3 py-2 bg-zinc-800 border border-zinc-600 rounded">
+          <% users.forEach(u => { %>
+            <option value="<%= u._id %>"><%= u.name %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div>
+        <label for="startDate" class="block mb-1">Start Date</label>
+        <input type="date" name="startDate" required class="w-full px-3 py-2 bg-zinc-800 border border-zinc-600 rounded" />
+      </div>
+      <div>
+        <label for="endDate" class="block mb-1">End Date</label>
+        <input type="date" name="endDate" required class="w-full px-3 py-2 bg-zinc-800 border border-zinc-600 rounded" />
+      </div>
+      <div>
+        <label for="assignedHours" class="block mb-1">Assigned Hours</label>
+        <input type="number" name="assignedHours" placeholder="Hours" class="w-full px-3 py-2 bg-zinc-800 border border-zinc-600 rounded" required />
+      </div>
+      <div>
+        <label for="assignedMinutes" class="block mb-1">Assigned Minutes</label>
+        <input type="number" name="assignedMinutes" placeholder="Minutes" class="w-full px-3 py-2 bg-zinc-800 border border-zinc-600 rounded" required />
+      </div>
+      <div class="md:col-span-2">
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded">Submit</button>
+      </div>
+    </form>
+
+  
+    <form action="/weekly-work/filter" method="get" class="flex flex-wrap gap-2 items-end mb-8">
+      <div>
+        <label class="text-sm block mb-1">User</label>
+        <select name="userId" class="bg-zinc-900 border border-zinc-700 text-white px-2 py-1 rounded text-sm">
+          <option value="">All Users</option>
+          <% users.forEach(u => { %>
+            <option value="<%= u._id %>"><%= u.name %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div>
+        <label class="text-sm block mb-1">Start Date</label>
+        <input type="date" name="startDate" class="bg-zinc-900 border border-zinc-700 text-white px-2 py-1 rounded text-sm" />
+      </div>
+      <div>
+        <label class="text-sm block mb-1">End Date</label>
+        <input type="date" name="endDate" class="bg-zinc-900 border border-zinc-700 text-white px-2 py-1 rounded text-sm" />
+      </div>
+      <div class="mt-[1.85rem]">
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 px-2 py-1 text-sm rounded text-white">Filter</button>
+      </div>
+    </form>
+
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full bg-zinc-800 border border-zinc-700 rounded-lg text-center">
+        <thead>
+          <tr>
+            <th class="px-4 py-2 border-b">#</th>
+            <th class="px-4 py-2 border-b">User</th>
+            <th class="px-4 py-2 border-b">Start</th>
+            <th class="px-4 py-2 border-b">End</th>
+            <th class="px-4 py-2 border-b">Assigned</th>
+            <th class="px-4 py-2 border-b">Worked</th>
+            <th class="px-4 py-2 border-b">Remaining</th>
+            <th class="px-4 py-2 border-b">Extra</th>
+            <th class="px-4 py-2 border-b">Assigned By</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% entries.forEach((entry, index) => { %>
+            <tr>
+              <td class="px-4 py-2 border-b"><%= index + 1 %></td>
+              <td class="px-4 py-2 border-b"><%= entry.user?.name || '-' %></td>
+              <td class="px-4 py-2 border-b"><%= new Date(entry.startDate).toLocaleDateString() %></td>
+              <td class="px-4 py-2 border-b"><%= new Date(entry.endDate).toLocaleDateString() %></td>
+              <td class="px-4 py-2 border-b"><%= entry.assignedHours %></td>
+              <td class="px-4 py-2 border-b"><%= entry.workedHours %></td>
+              <td class="px-4 py-2 border-b"><%= entry.remainingHours %></td>
+              <td class="px-4 py-2 border-b"><%= entry.extraHours %></td>
+              <td class="px-4 py-2 border-b">
+                <% if (entry.createdBy?.name) { %>
+                  <%= entry.createdBy.name %>
+                <% } else { %>
+                  -
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

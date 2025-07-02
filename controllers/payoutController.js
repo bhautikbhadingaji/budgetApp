@@ -1,14 +1,23 @@
-// payoutController.js
 import WorkReport from '../models/workReportModel.js';
 import User from '../models/userModel.js';
 import Expense from '../models/expenseModel.js';
+import Payout from '../models/payoutModel.js'; 
 
 export const getPayoutByDateRange = async (req, res) => {
   try {
     const { userId, startDate, endDate } = req.body;
 
+    const allPayouts = await Payout.find().populate('user', 'name'); 
+
     if (!userId || !startDate || !endDate) {
-      return res.render('payoutResult', { error: 'All fields are required', result: null });
+      return res.render('payout', {
+        user: req.user,
+        users: await User.find({}, 'name _id'),
+        success: null,
+        error: 'All fields are required',
+        result: null,
+        allPayouts
+      });
     }
 
     const start = new Date(startDate);
@@ -21,7 +30,14 @@ export const getPayoutByDateRange = async (req, res) => {
     }).populate('createdBy', 'name perHourCharge');
 
     if (reports.length === 0) {
-      return res.render('payoutResult', { error: 'No data found for selected range.', result: null });
+      return res.render('payout', {
+        user: req.user,
+        users: await User.find({}, 'name _id'),
+        success: null,
+        error: 'No data found for selected range.',
+        result: null,
+        allPayouts
+      });
     }
 
     let totalHours = 0;
@@ -57,11 +73,19 @@ export const getPayoutByDateRange = async (req, res) => {
         totalMinutes,
         totalPayment: totalPayment.toFixed(2),
         status
-      }
+      },
+      allPayouts 
     });
   } catch (error) {
     console.error("Payout Controller Error:", error);
-    res.render('payoutResult', { error: "Server Error", result: null });
+    res.render('payout', {
+      user: req.user,
+      users: await User.find({}, 'name _id'),
+      success: null,
+      error: 'Server Error',
+      result: null,
+      allPayouts: [] 
+    });
   }
 };
 
@@ -83,10 +107,22 @@ export const payoutToExpense = async (req, res) => {
       amount: parseFloat(totalPayment),
       date: new Date(),
       category: 'Selery',
-      userId
+      userId,
+      createdBy: req.user.userId 
     });
 
     await expense.save();
+
+    const payout = new Payout({
+      user: userId,
+      username: user.name,
+      startDate: new Date(startDate),
+      endDate: new Date(endDate),
+      amount: parseFloat(totalPayment),
+      status: 'Paid',
+      createdBy: req.user.userId 
+    });
+    await payout.save();
 
     await WorkReport.updateMany({
       createdBy: userId,

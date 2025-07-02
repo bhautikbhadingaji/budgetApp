@@ -1,6 +1,5 @@
 import User from '../models/userModel.js';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 
 export const register = async (req, res) => {
   const { name, email, password, perHourCharge, role } = req.body;
@@ -18,7 +17,7 @@ export const register = async (req, res) => {
       email,
       password: hashedPassword,
       perHourCharge,
-      role: role || 'user'  
+      role: role || 'user'
     });
 
     await newUser.save();
@@ -29,9 +28,6 @@ export const register = async (req, res) => {
     res.status(500).render('register', { error: 'Server error' });
   }
 };
-
-
-
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -46,32 +42,37 @@ export const login = async (req, res) => {
       return res.status(401).render('login', { error: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '1d',
-    });
+    req.session.userId = user._id;
 
-    res.cookie('token', token, {
-      httpOnly: true,
-      // secure: process.env.NODE_ENV === 'production',
-      secure:false,
-      sameSite: 'Lax',
-      maxAge: 24 * 60 * 60 * 1000,
-    });
+    req.session.save((err) => {
+      if (err) {
+        console.error(err.message);
+        return res.status(500).render('login', { error: 'Session error' });
+      }
 
-    
-    res.redirect('/dashboard');
+      console.log(req.session.userId);
+      res.redirect('/dashboard');
+    });
 
   } catch (err) {
-    console.error('Login error:', err.message);
+    console.error(err.message);
     res.status(500).render('login', { error: 'Server error' });
   }
 };
 
 
 
+
 export const logout = (req, res) => {
-  res.clearCookie('token');
-  res.status(200).json({ message: 'Logged out successfully' });
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Logout error:', err.message);
+      return res.status(500).json({ message: 'Logout failed' });
+    }
+
+    res.clearCookie('connect.sid'); 
+    res.redirect('/login');
+  });
 };
 
 
@@ -85,6 +86,7 @@ export const viewUserProfile = async (req, res) => {
     res.status(500).json({ message: 'Server Error', error: error.message });
   }
 };
+
 
 export const editUserProfile = async (req, res) => {
   try {
@@ -113,8 +115,10 @@ export const removeUserProfile = async (req, res) => {
     if (!deletedUser)
       return res.status(404).json({ message: 'User not found' });
 
-    res.clearCookie('token');
-    res.status(200).json({ message: 'User deleted successfully' });
+    req.session.destroy(() => {
+      res.clearCookie('connect.sid');
+      res.status(200).json({ message: 'User deleted successfully' });
+    });
   } catch (error) {
     res.status(500).json({ message: 'Server Error', error: error.message });
   }
